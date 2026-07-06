@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../../lib/i18n';
 import { getCurrentDayName } from '../../lib/routeScheduler';
+import { supabase } from '../../lib/supabase';
 
 export const OperationalAlerts: React.FC = () => {
   const { t } = useTranslation();
@@ -55,6 +56,18 @@ export const OperationalAlerts: React.FC = () => {
   };
 
   useEffect(() => {
+    const fetchAdminMetadata = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && !isMaster) {
+        const meta = user.user_metadata || {};
+        if (meta.district) setSelectedDistrict(meta.district);
+        if (meta.zone) setSelectedZone(meta.zone);
+      }
+    };
+    fetchAdminMetadata();
+  }, [userRole]);
+
+  useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 15000);
     return () => clearInterval(interval);
@@ -72,15 +85,19 @@ export const OperationalAlerts: React.FC = () => {
 
   const activeAlerts = alerts.filter(alert => {
     const isPending = alert.status === 'PENDING';
-    const matchesDistrict = selectedDistrict === 'All' || alert.buses?.district === selectedDistrict;
-    const matchesZone = selectedZone === 'All' || alert.buses?.zone === selectedZone;
+    const matchesDistrict = selectedDistrict === 'All' || 
+      (alert.buses?.district && alert.buses.district.toLowerCase() === selectedDistrict.toLowerCase());
+    const matchesZone = selectedZone === 'All' || 
+      (alert.buses?.zone && alert.buses.zone.toLowerCase() === selectedZone.toLowerCase());
     return isPending && matchesDistrict && matchesZone;
   });
 
   const historyAlerts = alerts.filter(alert => {
     const isAcked = alert.status === 'ACKNOWLEDGED';
-    const matchesDistrict = selectedDistrict === 'All' || alert.buses?.district === selectedDistrict;
-    const matchesZone = selectedZone === 'All' || alert.buses?.zone === selectedZone;
+    const matchesDistrict = selectedDistrict === 'All' || 
+      (alert.buses?.district && alert.buses.district.toLowerCase() === selectedDistrict.toLowerCase());
+    const matchesZone = selectedZone === 'All' || 
+      (alert.buses?.zone && alert.buses.zone.toLowerCase() === selectedZone.toLowerCase());
     return isAcked && matchesDistrict && matchesZone;
   });
 
@@ -249,7 +266,13 @@ export const OperationalAlerts: React.FC = () => {
                             </div>
                             <div className="bg-white p-3 border border-slate-100">
                               <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Location</p>
-                              <p className="text-sm font-bold text-slate-900">{alert.location || 'N/A'}</p>
+                              <p className="text-sm font-bold text-slate-900">
+                                {alert.location 
+                                  ? (typeof alert.location === 'object' && (alert.location as any).lat 
+                                      ? `${Number((alert.location as any).lat).toFixed(4)}, ${Number((alert.location as any).lng).toFixed(4)}`
+                                      : String(alert.location))
+                                  : 'N/A'}
+                              </p>
                             </div>
                           </div>
 

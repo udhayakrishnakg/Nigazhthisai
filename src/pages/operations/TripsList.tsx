@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminApi } from '../../lib/api';
 import { toast } from 'sonner';
+import { supabase } from '../../lib/supabase';
 
 export const TripsList: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -78,6 +79,18 @@ export const TripsList: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchAdminMetadata = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && !isMaster) {
+        const meta = user.user_metadata || {};
+        if (meta.district) setSelectedDistrict(meta.district);
+        if (meta.zone) setSelectedZone(meta.zone);
+      }
+    };
+    fetchAdminMetadata();
+  }, [userRole]);
 
   useEffect(() => {
     fetchData();
@@ -148,13 +161,18 @@ export const TripsList: React.FC = () => {
 
   const filteredTrips = trips.filter(trip => {
     const route = routes.find(r => r.id.toString() === trip.route_id.toString());
-    const matchesSearch = trip.driver_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         trip.conductor_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (route && (route.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                   route.code.toLowerCase().includes(searchQuery.toLowerCase())));
+    const driverName = trip.driver_name || '';
+    const conductorName = trip.conductor_name || '';
     
-    const matchesDistrict = selectedDistrict === 'All' || trip.district === selectedDistrict;
-    const matchesZone = selectedZone === 'All' || trip.zone === selectedZone;
+    const matchesSearch = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         conductorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (route && ((route.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                   (route.code || '').toLowerCase().includes(searchQuery.toLowerCase())));
+    
+    const matchesDistrict = selectedDistrict === 'All' || 
+      (trip.district && trip.district.toLowerCase() === selectedDistrict.toLowerCase());
+    const matchesZone = selectedZone === 'All' || 
+      (trip.zone && trip.zone.toLowerCase() === selectedZone.toLowerCase());
     
     return matchesSearch && matchesDistrict && matchesZone;
   });

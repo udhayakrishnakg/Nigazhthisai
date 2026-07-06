@@ -6,6 +6,7 @@ import { adminApi, conductorApi } from '../lib/api';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
 import { getCookie } from '../utils/cookies';
+import { NigazhthisaiIcon } from '../components/NigazhthisaiLogo';
 
 type LoginRole = 'MASTER_ADMIN' | 'ADMIN' | 'DRIVER' | 'CONDUCTOR' | 'PASSENGER';
 
@@ -205,8 +206,8 @@ export const LoginPage: React.FC = () => {
         className="w-full max-w-lg bg-white p-12 shadow-2xl relative z-10"
       >
         <div className="flex flex-col items-center mb-12">
-          <div className="w-16 h-16 bg-primary flex items-center justify-center mb-6 shadow-xl shadow-primary/20">
-            <Bus size={32} className="text-white" />
+          <div className="mb-6">
+            <NigazhthisaiIcon size={64} />
           </div>
           <h1 className="text-3xl font-black uppercase tracking-tighter text-slate-900">
             Nigazhthisai <span className="text-primary">

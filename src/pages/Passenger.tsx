@@ -121,23 +121,25 @@ const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => 
 const LiveOccupancyProgressBar: React.FC<{ occupancy: number; max?: number }> = ({ occupancy, max = 50 }) => {
   const percentage = Math.min((occupancy / max) * 100, 100);
   let fillBgClass = '';
+  let fillColor: string | null = null;
   let shadowStyle = '';
-  if (percentage >= 95) {
+
+  if (percentage > 93) {
     // No Space: Flashing vibrant gradient
     fillBgClass = 'bg-gradient-to-r from-rose-600 via-purple-600 via-orange-500 to-rose-600 animate-[pulse_1s_infinite]';
     shadowStyle = 'rgba(225,29,72,0.6)';
-  } else if (percentage >= 80) {
-    // High: Solid Red
-    fillBgClass = 'bg-rose-500';
-    shadowStyle = 'rgba(244,63,94,0.4)';
-  } else if (percentage >= 50) {
-    // Medium: Solid Yellow/Amber
-    fillBgClass = 'bg-amber-400';
-    shadowStyle = 'rgba(251,191,36,0.3)';
+  } else if (percentage > 83) {
+    // Last 10% (83% - 93%): Solid Red
+    fillColor = '#ef4444'; // Explicit hex Red
+    shadowStyle = 'rgba(239,68,68,0.4)';
+  } else if (percentage > 33) {
+    // Next 50% (33% - 83%): Solid Orange
+    fillColor = '#f97316'; // Explicit hex Orange
+    shadowStyle = 'rgba(249,115,22,0.3)';
   } else {
-    // Low: Solid Green
-    fillBgClass = 'bg-emerald-500';
-    shadowStyle = 'rgba(16,185,129,0.3)';
+    // 0% - 33%: Solid Green
+    fillColor = '#22c55e'; // Explicit hex Green
+    shadowStyle = 'rgba(34,197,94,0.3)';
   }
 
   return (
@@ -150,7 +152,10 @@ const LiveOccupancyProgressBar: React.FC<{ occupancy: number; max?: number }> = 
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          style={{ boxShadow: `0 0 10px ${shadowStyle}` }}
+          style={{ 
+            boxShadow: `0 0 10px ${shadowStyle}`,
+            ...(fillColor ? { backgroundColor: fillColor } : {})
+          }}
           className={`h-full relative rounded-none transition-all ${fillBgClass}`}
         >
           <div className="absolute inset-0 bg-white/10 mix-blend-overlay" />
