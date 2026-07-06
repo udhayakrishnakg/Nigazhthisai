@@ -143,6 +143,14 @@ export const ConductorPage: React.FC = () => {
   const activeBus = (buses.length > 0 ? buses : BUS_FLEET).find(b => b.bus_id === activeBusId);
   const activeBusStops = activeBus ? activeBus.stops : [];
 
+  // Pre-fill boarding/destination stops when stops are loaded or changed
+  useEffect(() => {
+    if (activeBusStops && activeBusStops.length >= 2) {
+      if (!boardingStop) setBoardingStop(activeBusStops[0]);
+      if (!destinationStop) setDestinationStop(activeBusStops[1]);
+    }
+  }, [activeBusStops, boardingStop, destinationStop]);
+
   // Determine initial view based on saved credentials
   useEffect(() => {
     if (!jwt) {

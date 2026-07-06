@@ -120,15 +120,24 @@ const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => 
 
 const LiveOccupancyProgressBar: React.FC<{ occupancy: number; max?: number }> = ({ occupancy, max = 50 }) => {
   const percentage = Math.min((occupancy / max) * 100, 100);
-  let fillBgClass = 'bg-gradient-to-r from-emerald-500 to-teal-400';
-  let shadowStyle = 'rgba(16,185,129,0.3)';
-  
-  if (percentage >= 80) {
-    fillBgClass = 'bg-gradient-to-r from-emerald-500 via-amber-500 via-orange-500 to-rose-600 animate-[pulse_1.5s_infinite]';
-    shadowStyle = 'rgba(244,63,94,0.6)';
+  let fillBgClass = '';
+  let shadowStyle = '';
+  if (percentage >= 95) {
+    // No Space: Flashing vibrant gradient
+    fillBgClass = 'bg-gradient-to-r from-rose-600 via-purple-600 via-orange-500 to-rose-600 animate-[pulse_1s_infinite]';
+    shadowStyle = 'rgba(225,29,72,0.6)';
+  } else if (percentage >= 80) {
+    // High: Solid Red
+    fillBgClass = 'bg-rose-500';
+    shadowStyle = 'rgba(244,63,94,0.4)';
   } else if (percentage >= 50) {
-    fillBgClass = 'bg-gradient-to-r from-emerald-500 via-yellow-450 to-amber-500';
-    shadowStyle = 'rgba(245,158,11,0.4)';
+    // Medium: Solid Yellow/Amber
+    fillBgClass = 'bg-amber-400';
+    shadowStyle = 'rgba(251,191,36,0.3)';
+  } else {
+    // Low: Solid Green
+    fillBgClass = 'bg-emerald-500';
+    shadowStyle = 'rgba(16,185,129,0.3)';
   }
 
   return (
@@ -195,13 +204,19 @@ export const PassengerPage: React.FC = () => {
   // SOS Countdown state
   const [sosActive, setSosActive] = useState(false);
 
+  const [userName, setUserName] = useState<string>('Citizen');
+
   // Retrieve user session or initialize local passenger guest uuid
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUserId(user.id);
+        if (user.user_metadata?.name) {
+          setUserName(user.user_metadata.name);
+        }
       } else {
         setUserId('00000000-0000-0000-0000-000000000000');
+        setUserName('Citizen');
       }
     });
   }, []);
@@ -495,7 +510,7 @@ export const PassengerPage: React.FC = () => {
           </div>
           <div className="flex items-baseline justify-between mt-auto">
             <div>
-              <p className="text-xl font-black tracking-tight">Welcome, Citizen</p>
+              <p className="text-xl font-black tracking-tight">Welcome, {userName}</p>
             </div>
             <div className="text-right">
               <span className="text-[9px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 font-bold rounded-none">ONLINE</span>
@@ -1072,7 +1087,7 @@ export const PassengerPage: React.FC = () => {
                   </div>
                   <div className="text-center w-full">
                     <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-2">PASSENGER</h2>
-                    <p className="text-[10px] font-bold opacity-70 tracking-[0.2em]">Nigazhthisai Citizen</p>
+                    <p className="text-[10px] font-bold opacity-70 tracking-[0.2em]">{userName}</p>
                   </div>
                 </div>
                 <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#fff 1.5px, transparent 1.5px)', backgroundSize: '16px 16px' }} />
