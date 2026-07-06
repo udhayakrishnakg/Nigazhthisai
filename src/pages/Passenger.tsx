@@ -809,8 +809,18 @@ export const PassengerPage: React.FC = () => {
   );
 
   const TrackingView = () => {
-    const currentLat = selectedTrip?.buses?.current_lat || 11.1085;
-    const currentLng = selectedTrip?.buses?.current_lng || 77.3411;
+    const routeStops: string[] = selectedTrip?.routes?.stops || [];
+    const stopsToUse = routeStops.length > 0 ? routeStops : [fromStop, 'Stop A', 'Stop B', 'Stop C', toStop];
+    
+    const currentSegment = selectedTrip?.current_segment || '';
+    let activeStopIndex = stopsToUse.findIndex(s => s.toLowerCase() === currentSegment.toLowerCase());
+    if (activeStopIndex === -1) {
+      const boardIdx = stopsToUse.findIndex(s => s.toLowerCase() === fromStop.toLowerCase());
+      activeStopIndex = boardIdx !== -1 ? Math.min(boardIdx + 1, stopsToUse.length - 1) : 1;
+    }
+
+    const boardIndex = stopsToUse.findIndex(s => s.toLowerCase() === fromStop.toLowerCase());
+    const destIndex = stopsToUse.findIndex(s => s.toLowerCase() === toStop.toLowerCase());
 
     return (
       <div className="space-y-6">
@@ -824,42 +834,79 @@ export const PassengerPage: React.FC = () => {
           <h2 className="text-xl font-black uppercase tracking-tighter">Live Tracker</h2>
         </div>
 
-        <div className="bg-slate-900 h-96 relative border border-slate-800 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.15),rgba(255,255,255,0))]" />
+        <div className="bg-slate-950 p-6 border border-slate-800 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(13,42,93,0.25),rgba(255,255,255,0))]" />
           
-          <svg className="absolute inset-0 w-full h-full opacity-35" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 0 100 Q 150 150 450 100" fill="none" stroke="gray" strokeWidth="6" strokeDasharray="5,5" />
-            <path d="M 0 200 L 450 200" fill="none" stroke="gray" strokeWidth="8" />
-            <path d="M 150 0 L 150 400" fill="none" stroke="gray" strokeWidth="6" strokeDasharray="5,5" />
-            <path d="M 300 0 L 300 400" fill="none" stroke="gray" strokeWidth="6" />
-          </svg>
-
-          <motion.div 
-            animate={{ scale: [1, 1.1, 1], y: [0, -3, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="absolute z-10 flex flex-col items-center gap-1.5"
-            style={{ left: '45%', top: '48%' }}
-          >
-            <div className="bg-emerald-500 text-white p-2.5 rounded-full shadow-lg border-2 border-white shadow-emerald-500/50">
-              <Bus size={20} />
+          <div className="relative z-10 space-y-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Route Pipeline</span>
+              <span className="px-2 py-0.5 bg-[#D97F00]/20 border border-[#D97F00]/30 text-[#D97F00] text-[8px] font-black uppercase tracking-wider">
+                {selectedTrip?.buses?.registration_number || 'TN BUS'}
+              </span>
             </div>
-            <div className="bg-slate-800/90 text-white text-[8px] font-black px-2 py-0.5 border border-slate-700 whitespace-nowrap shadow-md uppercase tracking-wider">
-              {selectedTrip?.buses?.registration_number || 'TN BUS'}
+
+            <div className="relative pl-8 space-y-6">
+              <div className="absolute left-[15px] top-3 bottom-3 w-0.5 bg-slate-800" />
+              <div 
+                className="absolute left-[15px] top-3 w-0.5 bg-gradient-to-b from-[#D97F00] to-emerald-500 transition-all duration-500" 
+                style={{ 
+                  height: `${(activeStopIndex / Math.max(1, stopsToUse.length - 1)) * 100}%`,
+                  maxHeight: '94%'
+                }} 
+              />
+
+              {stopsToUse.map((stop, index) => {
+                const isCompleted = index < activeStopIndex;
+                const isActive = index === activeStopIndex;
+                const isBoarding = index === boardIndex;
+                const isDestination = index === destIndex;
+
+                return (
+                  <div key={stop + '-' + index} className="relative flex items-center gap-4">
+                    <div className="absolute -left-[25px] flex items-center justify-center">
+                      {isActive ? (
+                        <div className="relative flex items-center justify-center z-20">
+                          <span className="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-emerald-400 opacity-75" />
+                          <div className="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white shadow-lg shadow-emerald-500/50">
+                            <Bus size={14} className="animate-pulse" />
+                          </div>
+                        </div>
+                      ) : isCompleted ? (
+                        <div className="w-4 h-4 rounded-full bg-[#D97F00] border border-white flex items-center justify-center text-white z-10 shadow-sm" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full bg-slate-800 border border-slate-700 z-10" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 bg-slate-900/40 hover:bg-slate-900/70 border border-slate-800/40 p-4 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <p className={`text-xs font-black uppercase tracking-wide ${isActive ? 'text-emerald-400' : isCompleted ? 'text-slate-300' : 'text-slate-500'}`}>
+                          {stop}
+                        </p>
+                        {isActive && (
+                          <span className="text-[8px] text-emerald-400 font-extrabold uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                            ● Current Position
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {isBoarding && (
+                          <span className="px-1.5 py-0.5 bg-[#0D2A5D] border border-blue-900/40 text-white text-[7px] font-black tracking-widest uppercase">
+                            Boarding
+                          </span>
+                        )}
+                        {isDestination && (
+                          <span className="px-1.5 py-0.5 bg-[#D97F00] border border-orange-900/40 text-white text-[7px] font-black tracking-widest uppercase animate-pulse">
+                            Destination
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </motion.div>
-
-          <div className="absolute left-[15%] top-[25%] flex flex-col items-center gap-1">
-            <div className="w-3.5 h-3.5 bg-blue-500 rounded-full border border-white shadow-md shadow-blue-500/50" />
-            <span className="text-[7px] text-slate-400 font-bold uppercase tracking-wider">{fromStop}</span>
-          </div>
-
-          <div className="absolute left-[70%] top-[70%] flex flex-col items-center gap-1">
-            <div className="w-3.5 h-3.5 bg-rose-500 rounded-full border border-white shadow-md shadow-rose-500/50 animate-pulse" />
-            <span className="text-[7px] text-slate-400 font-bold uppercase tracking-wider">{toStop}</span>
-          </div>
-
-          <div className="absolute bottom-4 right-4 bg-slate-900/90 px-3 py-1.5 text-white border border-slate-800 text-[8px] font-bold tracking-widest uppercase">
-            SIMULATED COORDINATES: {currentLat.toFixed(4)}N, {currentLng.toFixed(4)}E
           </div>
         </div>
 

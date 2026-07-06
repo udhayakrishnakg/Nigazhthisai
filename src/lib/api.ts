@@ -345,9 +345,9 @@ export const adminApi = {
       driver_name: tripData.driver_name,
       conductor_name: tripData.conductor_name,
       status: tripData.status || 'SCHEDULED',
-      start_time: tripData.actual_start_time || null,
-      district: tripData.district,
-      zone: tripData.zone
+      start_time: tripData.start_time || tripData.actual_start_time || null,
+      district: tripData.district || null,
+      zone: tripData.zone || null
     });
     if (error) throw error;
     return data;
