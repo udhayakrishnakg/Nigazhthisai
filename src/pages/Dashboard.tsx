@@ -307,7 +307,7 @@ export const Dashboard: React.FC = () => {
                       {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                     <button 
-                      onClick={() => navigate('/operations/alerts')}
+                      onClick={() => navigate(`/operations/alerts?chatAlertId=${alert.id}`)}
                       className="text-xs font-black text-rose-600 uppercase tracking-widest hover:underline flex items-center gap-1 cursor-pointer"
                     >
                        {t('alerts.investigate')}

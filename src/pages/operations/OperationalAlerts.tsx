@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ShieldAlert, 
   MapPin, 
@@ -14,7 +14,10 @@ import {
   CalendarDays,
   Bus as BusIcon,
   Search,
-  Eye
+  Eye,
+  Send,
+  MessageSquare,
+  X
 } from 'lucide-react';
 import { adminApi } from '../../lib/api';
 import { toast } from 'sonner';
@@ -26,6 +29,7 @@ import { supabase } from '../../lib/supabase';
 export const OperationalAlerts: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [stats, setStats] = useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +43,13 @@ export const OperationalAlerts: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState('All');
   const DISTRICTS = ['All', 'Chennai', 'Madurai', 'Coimbatore', 'Salem', 'Tiruppur', 'Trichy', 'Erode'];
   const ZONES = ['All', 'North', 'South', 'West', 'East', 'Central'];
+
+  // Chat State
+  const [adminName, setAdminName] = useState('Admin');
+  const [chatAlert, setChatAlert] = useState<any | null>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [newMessageText, setNewMessageText] = useState('');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -55,17 +66,78 @@ export const OperationalAlerts: React.FC = () => {
     }
   };
 
+  const fetchMessages = async (alertId: number) => {
+    try {
+      const messages = await adminApi.getAlertMessages(alertId);
+      setChatMessages(messages);
+    } catch (err) {
+      console.error('Failed to load chat messages', err);
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessageText.trim() || !chatAlert) return;
+    try {
+      const msg = await adminApi.sendAlertMessage(
+        Number(chatAlert.id),
+        'ADMIN',
+        adminName,
+        newMessageText.trim()
+      );
+      setNewMessageText('');
+      setChatMessages(prev => [...prev, msg]);
+    } catch (err) {
+      toast.error('Failed to send message');
+    }
+  };
+
   useEffect(() => {
     const fetchAdminMetadata = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user && !isMaster) {
+      if (user) {
         const meta = user.user_metadata || {};
-        if (meta.district) setSelectedDistrict(meta.district);
-        if (meta.zone) setSelectedZone(meta.zone);
+        if (meta.name) setAdminName(meta.name);
+        else if (user.email) setAdminName(user.email.split('@')[0]);
+
+        if (!isMaster) {
+          if (meta.district) {
+            const match = DISTRICTS.find(d => d.toLowerCase() === meta.district.toLowerCase());
+            if (match) setSelectedDistrict(match);
+          }
+          if (meta.zone) {
+            const match = ZONES.find(z => z.toLowerCase() === meta.zone.toLowerCase());
+            if (match) setSelectedZone(match);
+          }
+        }
       }
     };
     fetchAdminMetadata();
   }, [userRole]);
+
+  // Handle Query Param redirection to open Chat
+  useEffect(() => {
+    const alertIdParam = searchParams.get('chatAlertId');
+    if (alertIdParam && alerts.length > 0) {
+      const foundAlert = alerts.find(a => a.id.toString() === alertIdParam.toString());
+      if (foundAlert) {
+        setChatAlert(foundAlert);
+        setIsChatOpen(true);
+        // Clear param so it doesn't reopen
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, alerts]);
+
+  // Poll Chat Messages
+  useEffect(() => {
+    if (!isChatOpen || !chatAlert) return;
+    fetchMessages(Number(chatAlert.id));
+    const interval = setInterval(() => {
+      fetchMessages(Number(chatAlert.id));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isChatOpen, chatAlert]);
 
   useEffect(() => {
     fetchData();
@@ -280,12 +352,22 @@ export const OperationalAlerts: React.FC = () => {
                             {alert.buses?.registration_number && (
                               <button 
                                 onClick={() => navigate(`/live?search=${alert.buses.registration_number}`)}
-                                className="px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
+                                className="px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 animate-none"
                               >
                                 <Eye size={14} />
                                 Track Live
                               </button>
                             )}
+                            <button 
+                              onClick={() => {
+                                setChatAlert(alert);
+                                setIsChatOpen(true);
+                              }}
+                              className="px-6 py-3 bg-[#0D2A5D] text-white text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2"
+                            >
+                              <MessageSquare size={14} />
+                              Investigate Alert
+                            </button>
                             {!isMaster && (
                               <button 
                                 onClick={() => handleAcknowledge(alert.id)}
@@ -398,6 +480,102 @@ export const OperationalAlerts: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Real-time Chat Drawer */}
+      <AnimatePresence>
+        {isChatOpen && chatAlert && (
+          <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-sm">
+            <div className="absolute inset-0" onClick={() => setIsChatOpen(false)} />
+
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 border-l border-slate-200"
+            >
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-rose-50 text-rose-600 rounded-sm shrink-0">
+                    <ShieldAlert size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-950 uppercase tracking-wider">Investigate Chat</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                      Bus: {chatAlert.buses?.registration_number || 'SYSTEM'} ({chatAlert.type})
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsChatOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 transition-all p-1.5 hover:bg-slate-200 rounded"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Chat Messages Panel */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
+                {/* Alert details card */}
+                <div className="bg-white p-4 border border-slate-200/80 rounded-sm text-xs space-y-2">
+                  <p className="font-bold text-slate-400 uppercase tracking-widest text-[9px]">Alert Context</p>
+                  <p className="font-black text-slate-900">{chatAlert.message}</p>
+                  <p className="text-slate-500 font-medium">
+                    Triggered at {new Date(chatAlert.created_at).toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="space-y-4 pt-4">
+                  {chatMessages.length === 0 ? (
+                    <div className="py-12 text-center text-slate-400 text-xs font-bold uppercase tracking-wider">
+                      No messages yet. Send a message to initiate contact.
+                    </div>
+                  ) : (
+                    chatMessages.map((msg) => {
+                      const isAdmin = msg.sender_role === 'ADMIN';
+                      return (
+                        <div key={msg.id} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
+                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 px-1">
+                            {msg.sender_name} ({msg.sender_role})
+                          </span>
+                          <div className={`max-w-[85%] px-4 py-2.5 shadow-sm text-xs font-semibold leading-relaxed ${
+                            isAdmin 
+                              ? 'bg-[#0D2A5D] text-white rounded-l-md rounded-br-md' 
+                              : 'bg-white text-slate-800 border border-slate-200 rounded-r-md rounded-bl-md'
+                          }`}>
+                            {msg.message}
+                          </div>
+                          <span className="text-[8px] text-slate-400 font-bold mt-1 px-1">
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Input Form */}
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-100 bg-white flex items-center gap-3">
+                <input 
+                  type="text"
+                  placeholder="Type investigation message..."
+                  value={newMessageText}
+                  onChange={(e) => setNewMessageText(e.target.value)}
+                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs font-semibold rounded-none"
+                />
+                <button
+                  type="submit"
+                  className="p-2.5 bg-[#0D2A5D] text-white hover:bg-slate-800 transition-all flex items-center justify-center"
+                >
+                  <Send size={16} />
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
