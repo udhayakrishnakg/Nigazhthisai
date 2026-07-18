@@ -19,6 +19,7 @@ export const Support: React.FC = () => {
     subject: '',
     message: ''
   });
+  const [priority, setPriority] = useState('Normal');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,59 +39,63 @@ export const Support: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans">
       {/* Support Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary text-white">
-            <HelpCircle size={32} />
+          <div className="p-3 bg-[#0D2A5D] text-white rounded-2xl">
+            <HelpCircle size={28} className="text-[#D97F00]" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Help Center</h1>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nigazhthisai Ops Support & Documentation</p>
+            <h1 className="text-2xl font-extrabold text-[#0D2A5D] uppercase tracking-tight">Help Center</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nigazhthisai Ops Support & Documentation</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-black text-slate-900">24/7 Priority Support</p>
-            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center justify-end gap-1">
+            <p className="text-sm font-extrabold text-[#0D2A5D]">24/7 Priority Support</p>
+            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider flex items-center justify-end gap-1">
               <ShieldCheck size={10} />
               Operational for Administrators
             </p>
           </div>
-          <a href="tel:+914424794242" className="p-4 bg-white border border-slate-200 text-primary hover:bg-slate-50 transition-all">
-            <Phone size={20} />
+          <a href="tel:+914424794242" className="p-3.5 bg-white border border-slate-100 rounded-2xl text-[#0D2A5D] hover:bg-slate-50 hover:text-[#D97F00] transition-all shadow-xs">
+            <Phone size={18} />
           </a>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Contact Form */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 p-8">
-          <div className="flex items-center gap-2 mb-8">
-            <MessageSquare size={20} className="text-primary" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-slate-900">Send us a message</h2>
+        <div className="lg:col-span-2 bg-white border border-slate-100 rounded-3xl shadow-sm p-8">
+          <div className="flex items-center gap-2.5 mb-6">
+            <MessageSquare size={18} className="text-[#D97F00]" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#0D2A5D]">Send us a message</h2>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</label>
-                <select className="w-full p-4 bg-slate-50 border border-slate-100 text-sm font-bold focus:border-primary outline-none transition-all">
-                  <option>Technical Support</option>
-                  <option>Revenue Discrepancy</option>
-                  <option>Hardware/ETM Issues</option>
-                  <option>User Management</option>
-                </select>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Department</label>
+                <div className="relative">
+                  <select className="w-full px-4 py-2.5 bg-white border border-slate-100 text-xs font-bold text-[#0D2A5D] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D2A5D]/10 focus:border-[#0D2A5D] appearance-none cursor-pointer">
+                    <option>Technical Support</option>
+                    <option>Revenue Discrepancy</option>
+                    <option>Hardware/ETM Issues</option>
+                    <option>User Management</option>
+                  </select>
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[10px]">▼</div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Priority</label>
-                <div className="flex gap-2">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Priority</label>
+                <div className="flex bg-slate-50 border border-slate-100 p-1 rounded-xl">
                   {['Normal', 'High', 'Urgent'].map(p => (
                     <button 
                       key={p}
                       type="button"
-                      className={`flex-1 py-1 text-[10px] font-black uppercase tracking-widest border transition-all ${p === 'Normal' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'}`}
+                      onClick={() => setPriority(p)}
+                      className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all ${priority === p ? 'bg-[#0D2A5D] text-white shadow-xs' : 'text-slate-400 hover:text-slate-700'}`}
                     >
                       {p}
                     </button>
@@ -99,60 +104,60 @@ export const Support: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Issue Subject</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Issue Subject</label>
               <input 
                 type="text" 
                 value={formState.subject}
                 onChange={e => setFormState({...formState, subject: e.target.value})}
                 placeholder="e.g. GPS Delay in Route 102"
-                className="w-full p-4 bg-slate-50 border border-slate-100 text-sm font-bold focus:border-primary outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-white border border-slate-100 text-xs font-bold text-[#0D2A5D] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D2A5D]/10 focus:border-[#0D2A5D] transition-all"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Detailed Description</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Detailed Description</label>
               <textarea 
-                rows={5}
+                rows={4}
                 value={formState.message}
                 onChange={e => setFormState({...formState, message: e.target.value})}
                 placeholder="Describe the issue in detail..."
-                className="w-full p-4 bg-slate-50 border border-slate-100 text-sm font-bold focus:border-primary outline-none transition-all resize-none"
+                className="w-full px-4 py-2.5 bg-white border border-slate-100 text-xs font-bold text-[#0D2A5D] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D2A5D]/10 focus:border-[#0D2A5D] transition-all resize-none"
               />
             </div>
 
-            <button type="submit" className="w-full py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all">
-              <Send size={16} />
+            <button type="submit" className="w-full py-3 bg-[#0D2A5D] hover:bg-[#0D2A5D]/95 text-white text-xs font-bold uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all">
+              <Send size={14} className="text-[#D97F00]" />
               Submit Ticket
             </button>
           </form>
         </div>
 
         {/* Quick Help & FAQs */}
-        <div className="space-y-8">
-          <div className="bg-slate-900 p-8 text-white">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-6 border-b border-white/10 pb-4">Knowledge Base</h3>
+        <div className="space-y-6">
+          <div className="bg-[#0D2A5D] rounded-3xl p-8 text-white shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider mb-5 border-b border-white/10 pb-3 text-[#D97F00]">Knowledge Base</h3>
             <ul className="space-y-4">
               <li>
-                <a href="#" className="group flex items-center gap-3 text-xs font-bold text-slate-400 hover:text-white transition-all">
-                  <div className="w-8 h-8 bg-white/5 flex items-center justify-center group-hover:bg-primary transition-all">
-                    <Book size={14} />
+                <a href="#" className="group flex items-center gap-3 text-xs font-bold text-slate-300 hover:text-white transition-all">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#D97F00] group-hover:text-white transition-all">
+                    <Book size={12} />
                   </div>
                   User Guide v2.4
                 </a>
               </li>
               <li>
-                <a href="#" className="group flex items-center gap-3 text-xs font-bold text-slate-400 hover:text-white transition-all">
-                  <div className="w-8 h-8 bg-white/5 flex items-center justify-center group-hover:bg-primary transition-all">
-                    <FileText size={14} />
+                <a href="#" className="group flex items-center gap-3 text-xs font-bold text-slate-300 hover:text-white transition-all">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#D97F00] group-hover:text-white transition-all">
+                    <FileText size={12} />
                   </div>
                   System API Specs
                 </a>
               </li>
               <li>
-                <a href="#" className="group flex items-center gap-3 text-xs font-bold text-slate-400 hover:text-white transition-all">
-                  <div className="w-8 h-8 bg-white/5 flex items-center justify-center group-hover:bg-primary transition-all">
-                    <Clock size={14} />
+                <a href="#" className="group flex items-center gap-3 text-xs font-bold text-slate-300 hover:text-white transition-all">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#D97F00] group-hover:text-white transition-all">
+                    <Clock size={12} />
                   </div>
                   Maintenance Schedule
                 </a>
@@ -160,16 +165,16 @@ export const Support: React.FC = () => {
             </ul>
           </div>
 
-          <div className="bg-white border border-slate-200 p-6">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Frequently Asked Questions</h3>
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-5">Frequently Asked Questions</h3>
             <div className="space-y-4">
               {faqs.map((faq, idx) => (
                 <div key={idx} className="group cursor-help">
-                  <p className="text-sm font-black text-slate-900 mb-1 flex items-center justify-between">
+                  <p className="text-xs font-extrabold text-[#0D2A5D] mb-1 flex items-center justify-between">
                     {faq.q}
-                    <ChevronRight size={14} className="text-slate-300 group-hover:text-primary transition-all" />
+                    <ChevronRight size={14} className="text-slate-300 group-hover:text-[#D97F00] transition-all" />
                   </p>
-                  <p className="text-xs text-slate-400 font-bold hidden group-hover:block transition-all py-2 border-t border-slate-50 mt-2">
+                  <p className="text-[11px] text-slate-400 font-medium hidden group-hover:block transition-all py-2 border-t border-slate-50 mt-1.5">
                     {faq.a}
                   </p>
                 </div>
@@ -177,10 +182,10 @@ export const Support: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-6 bg-slate-50 border border-slate-200 border-dashed">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Emergency Hotline</p>
-            <p className="text-lg font-black text-slate-900 mb-4">+91 (044) 2479 4242</p>
-            <button className="w-full py-2 text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20 hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2">
+          <div className="p-6 bg-slate-50 border border-slate-150 border-dashed rounded-3xl">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Emergency Hotline</p>
+            <p className="text-lg font-extrabold text-[#0D2A5D] mb-4">+91 (044) 2479 4242</p>
+            <button className="w-full py-2 text-[10px] font-bold text-[#D97F00] uppercase tracking-wider border border-[#D97F00]/20 hover:bg-[#D97F00] hover:text-white rounded-xl transition-all flex items-center justify-center gap-1.5 bg-white">
               <ExternalLink size={12} />
               Open Live Chat
             </button>

@@ -1,0 +1,20 @@
+export const ApiRoutes = {
+  BookTicket: 'book_ticket',
+  CancelTicket: 'cancel_ticket',
+  StartTrip: 'start_trip',
+  EndTrip: 'end_trip',
+  CreateAlert: 'create_alert',
+  SendAlertMessage: 'send_alert_message',
+  GetRoutes: 'get_routes',
+  GetTrips: 'get_trips',
+  CreatePayment: 'create_payment',
+  GetBuses: 'get_buses',
+  GetStops: 'get_stops',
+  GetEtms: 'get_etms',
+  GetComplaints: 'get_complaints',
+  GetAlerts: 'get_alerts',
+  GetBookings: 'get_bookings',
+  Login: 'login_driver', // driver/conductor login
+  GetUserProfile: 'get_user_profile',
+  UpdateBusLocation: 'update_bus_location',
+};

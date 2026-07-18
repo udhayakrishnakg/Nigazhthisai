@@ -9,6 +9,17 @@ export interface AdminUser {
   status: 'ACTIVE' | 'INACTIVE';
 }
 
+export interface AdminShop {
+  id: string;
+  stop_id: string;
+  name: string;
+  description: string;
+  deal: string;
+  lat: number;
+  lng: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
 export interface AdminRoute {
   id: number;
   name: string;
@@ -134,5 +145,4 @@ export interface DashboardStats {
     idle_duration?: number;
     location?: { lat: number; lng: number };
   }[];
-  total_passengers: number;
 }
