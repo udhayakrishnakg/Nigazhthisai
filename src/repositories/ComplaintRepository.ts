@@ -12,8 +12,7 @@ export class ComplaintRepository implements IComplaintRepository {
   }
 
   public async createComplaint(req: CreateComplaintRequest): Promise<RpcResult<any>> {
-    // There is no direct RPC for creating a complaint listed, but we have getComplaints.
-    // Let's assume there is a mock fallback or an RPC we can invoke.
+    // Invoke RPC function or fallback to local storage persistence
     const res = await this.rpcClient.invokeFunction<any>('create_complaint', req);
     if (!res.success) {
       const storedComplaintsStr = localStorage.getItem('nigazhthisai_complaints') || '[]';

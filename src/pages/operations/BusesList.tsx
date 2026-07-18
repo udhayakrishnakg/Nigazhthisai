@@ -61,24 +61,17 @@ export const BusesList: React.FC = () => {
   const [etmSubmitting, setEtmSubmitting] = useState(false);
   const [etmDeleteConfirmId, setEtmDeleteConfirmId] = useState<any | null>(null);
 
-  const getStoredAdmins = () => {
-    const stored = localStorage.getItem('nigazhthisai_users');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        return parsed.filter((u: any) => u.role === 'MASTER_ADMIN' || u.role === 'ADMIN' || u.role === 'OPERATIONS');
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return [
-      { id: 1, name: 'Master Admin', role: 'MASTER_ADMIN', email: 'master@nigazhthisai.com' },
-      { id: 2, name: 'Admin Manager', role: 'ADMIN', email: 'admin@nigazhthisai.com' },
-      { id: 3, name: 'Operations Manager', role: 'OPERATIONS', email: 'ops@nigazhthisai.com' }
-    ];
-  };
+  const [adminsList, setAdminsList] = useState<any[]>([]);
 
-  const adminsList = getStoredAdmins();
+  const fetchAdmins = async () => {
+    try {
+      const allUsers = await adminApi.getUsers();
+      const filtered = allUsers.filter((u: any) => u.role === 'MASTER_ADMIN' || u.role === 'ADMIN' || u.role === 'OPERATIONS');
+      setAdminsList(filtered);
+    } catch (e) {
+      console.error('Failed to load admins', e);
+    }
+  };
 
   const handleOpenAdd = () => {
     setEditingBus(null);
@@ -141,6 +134,7 @@ export const BusesList: React.FC = () => {
   useEffect(() => {
     fetchBuses();
     fetchEtms();
+    fetchAdmins();
   }, []);
 
   // ETM Handler Methods

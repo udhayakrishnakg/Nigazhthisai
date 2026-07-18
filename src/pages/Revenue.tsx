@@ -35,18 +35,35 @@ export const Revenue: React.FC = () => {
   const ZONES = ['All', 'North', 'South', 'West', 'East', 'Central'];
 
   useEffect(() => {
-    const fetchData = async () => {
+    let active = true;
+    const fetchData = async (showLoading = false) => {
       try {
-        setLoading(true);
+        if (showLoading) {
+          setLoading(true);
+        }
         const res = await adminApi.getRevenueData({ district: selectedDistrict, zone: selectedZone });
-        setData(res);
+        if (active) {
+          setData(res);
+        }
       } catch (error) {
         toast.error('Failed to fetch revenue data');
       } finally {
-        setLoading(false);
+        if (showLoading && active) {
+          setLoading(false);
+        }
       }
     };
-    fetchData();
+
+    fetchData(true);
+
+    const interval = setInterval(() => {
+      fetchData(false);
+    }, 2000); // Poll every 2 seconds for real-time updates!
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [selectedDistrict, selectedZone]);
 
   const handleExportReport = () => {

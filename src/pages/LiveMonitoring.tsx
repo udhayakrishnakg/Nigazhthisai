@@ -76,7 +76,7 @@ export const LiveMonitoring: React.FC = () => {
       }
     };
     fetchLive();
-    const interval = setInterval(fetchLive, 10000); // Refresh every 10s
+    const interval = setInterval(fetchLive, 2000); // Refresh every 2s for near-real-time tracking
     return () => clearInterval(interval);
   }, []);
 

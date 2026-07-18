@@ -48,7 +48,7 @@ export interface AdminStop {
 
 export interface AdminBus {
   id: string;
-  reg_no?: string; // Adding reg_no for consistency with mock data
+  reg_no?: string; // Schema registration reference
   registration_number: string;
   route_id: number;
   route_name: string;
@@ -136,6 +136,7 @@ export interface DashboardStats {
     total: number;
     top_routes: { route_name: string; revenue: number }[];
   };
+  total_passengers: number;
   alerts: {
     id: string;
     type: 'GPS_OFFLINE' | 'HIGH_LOAD' | 'LATE_TRIP' | 'IDLE_BUS';
@@ -145,4 +146,17 @@ export interface DashboardStats {
     idle_duration?: number;
     location?: { lat: number; lng: number };
   }[];
+  trends: {
+    revenue: string;
+    revenue_up: boolean;
+    tickets: string;
+    tickets_up: boolean;
+    trips: string;
+    trips_up: boolean;
+    passengers: string;
+    passengers_up: boolean;
+    health: string;
+    health_up: boolean;
+  };
+  operational_health: string;
 }

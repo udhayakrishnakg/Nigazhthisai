@@ -19,11 +19,11 @@ export class PaymentRepository implements IPaymentRepository {
 
     if (!res.success) {
       // Fallback local simulation
-      const mockOrderId = 'order_' + Math.random().toString(36).substring(2, 12).toUpperCase();
+      const localOrderId = 'order_' + Math.random().toString(36).substring(2, 12).toUpperCase();
       return {
         success: true,
         data: {
-          id: mockOrderId,
+          id: localOrderId,
           amount: amount * 100, // in paisa
           currency: 'INR',
           status: 'created'

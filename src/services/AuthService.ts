@@ -19,41 +19,30 @@ export class AuthService {
       const { data: { session }, error } = await this.supabase.auth.getSession();
       
       if (error || !session || !session.user) {
-        // Fallback to local storage if user is offline or not set up
-        const localUserStr = localStorage.getItem('nigazhthisai_current_user');
-        if (localUserStr) {
-          try {
-            const localUser = JSON.parse(localUserStr) as CurrentUser;
-            return { success: true, data: localUser, status: 200 };
-          } catch (e) {
-            // ignore
-          }
-        }
-        
-        // Return default Guest Passenger
-        const guestUser: CurrentUser = {
-          id: 'guest-passenger-id',
-          name: 'Guest Passenger',
-          email: 'guest@nigazhthisai.com',
-          role: UserRole.Passenger
-        };
-        return { success: true, data: guestUser, status: 200 };
+        return { success: false, error: 'No active session found', status: 401 };
       }
 
-      const rawRole = session.user.user_metadata?.role || 'PASSENGER';
+      // Query from public.users to get the most up-to-date name, phone, role
+      const { data: profile } = await this.supabase
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      const rawRole = profile?.role || session.user.user_metadata?.role || 'PASSENGER';
       let mappedRole = UserRole.Passenger;
 
       if (rawRole === 'DRIVER') mappedRole = UserRole.Driver;
       else if (rawRole === 'CONDUCTOR') mappedRole = UserRole.Conductor;
-      else if (rawRole === 'ADMIN') mappedRole = UserRole.Admin;
+      else if (rawRole === 'ADMIN' || rawRole === 'MASTER_ADMIN' || rawRole === 'OPERATIONS') mappedRole = UserRole.Admin;
       else if (rawRole === 'INSPECTOR') mappedRole = UserRole.Inspector;
 
       const user: CurrentUser = {
         id: session.user.id,
-        name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+        name: profile?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
         email: session.user.email || '',
         role: mappedRole,
-        mobile: session.user.phone || '',
+        mobile: profile?.phone || session.user.phone || '',
         token: session.access_token
       };
 

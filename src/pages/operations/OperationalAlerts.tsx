@@ -58,7 +58,7 @@ export const OperationalAlerts: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 15000);
+    const interval = setInterval(fetchData, 2000);
     return () => clearInterval(interval);
   }, [selectedDistrict, selectedZone]);
 

@@ -34,12 +34,7 @@ export const Users: React.FC = () => {
 
   // Get admins list for control selection
   const admins = users.filter((u: any) => u.role === 'MASTER_ADMIN' || u.role === 'ADMIN' || u.role === 'OPERATIONS');
-  const DEFAULT_ADMINS = [
-    { id: 1, name: 'Master Admin', role: 'MASTER_ADMIN', email: 'master@nigazhthisai.com' },
-    { id: 2, name: 'Admin Manager', role: 'ADMIN', email: 'admin@nigazhthisai.com' },
-    { id: 3, name: 'Operations Manager', role: 'OPERATIONS', email: 'ops@nigazhthisai.com' }
-  ];
-  const displayAdmins = admins.length > 0 ? admins : DEFAULT_ADMINS;
+  const displayAdmins = admins;
 
   // Modal & Form state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);

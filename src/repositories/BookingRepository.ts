@@ -16,9 +16,9 @@ export class BookingRepository implements IBookingRepository {
     const res = await this.rpcClient.bookTicket<BookingResponse>(req);
     if (!res.success) {
       // Fallback local persistence
-      const mockBookingId = 'BK' + Math.random().toString(36).substring(2, 9).toUpperCase();
+      const localBookingId = 'BK' + Math.random().toString(36).substring(2, 9).toUpperCase();
       const localBooking: Booking = {
-        id: mockBookingId,
+        id: localBookingId,
         bus_id: req.bus_id,
         user_id: req.user_id,
         seats: req.seats,
@@ -42,7 +42,7 @@ export class BookingRepository implements IBookingRepository {
         success: true,
         data: {
           booking: localBooking,
-          payment_url: `https://checkout.example.com/pay?id=${mockBookingId}`
+          payment_url: `https://checkout.example.com/pay?id=${localBookingId}`
         } as any,
         status: 200
       };

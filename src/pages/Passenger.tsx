@@ -792,13 +792,10 @@ export const PassengerPage: React.FC = () => {
       (error) => {
         setIsDetectingLocation(false);
         if (!isAuto) {
-          const mockDistricts = ['Chennai', 'Coimbatore', 'Madurai', 'Erode'];
-          const randomMock = mockDistricts[Math.floor(Math.random() * mockDistricts.length)];
-          handleDistrictSelect(randomMock);
           toast.info(
             language === 'TA'
-              ? `இருப்பிட அனுமதி மறுக்கப்பட்டது. மாதிரியாக ${randomMock} தேர்ந்தெடுக்கப்பட்டது.`
-              : `Location permission denied. Fallback: Auto-selected ${randomMock}!`
+              ? 'இருப்பிட அனுமதி மறுக்கப்பட்டது. தயவுசெய்து உங்கள் மாவட்டத்தை கைமுறையாக தேர்ந்தெடுக்கவும்.'
+              : 'Location permission denied. Please select your district manually from the dropdown.'
           );
         }
       },

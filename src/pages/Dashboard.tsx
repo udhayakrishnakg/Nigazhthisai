@@ -60,18 +60,35 @@ export const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchStats = async () => {
+    let active = true;
+    const fetchStats = async (showLoading = false) => {
       try {
-        setIsLoading(true);
+        if (showLoading) {
+          setIsLoading(true);
+        }
         const data = await adminApi.getDashboardStats({ district: selectedDistrict, zone: selectedZone });
-        setStats(data);
+        if (active) {
+          setStats(data);
+        }
       } catch (error) {
         console.error('Failed to fetch stats', error);
       } finally {
-        setIsLoading(false);
+        if (showLoading && active) {
+          setIsLoading(false);
+        }
       }
     };
-    fetchStats();
+
+    fetchStats(true);
+
+    const interval = setInterval(() => {
+      fetchStats(false);
+    }, 2000); // Polling every 2 seconds for real-time updates!
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [selectedDistrict, selectedZone]);
 
   if (isLoading || !stats) {
@@ -126,8 +143,8 @@ export const Dashboard: React.FC = () => {
             title={t('dash.today_revenue')} 
             value={`₹${stats.today_revenue.total.toLocaleString()}`} 
             icon={TrendingUp} 
-            trend="+12.5%" 
-            trendUp={true} 
+            trend={stats.trends?.revenue || "+12.5%"} 
+            trendUp={stats.trends?.revenue_up ?? true} 
             onClick={() => navigate('/revenue')}
           />
         )}
@@ -135,33 +152,33 @@ export const Dashboard: React.FC = () => {
           title={t('dash.total_tickets')} 
           value={stats.today_tickets.total.toString()} 
           icon={Ticket} 
-          trend="+8.2%" 
-          trendUp={true} 
+          trend={stats.trends?.tickets || "+8.2%"} 
+          trendUp={stats.trends?.tickets_up ?? true} 
           onClick={() => navigate('/revenue')}
         />
         <StatCard 
           title={t('dash.active_trips')} 
           value={stats.today_trips.active.toString()} 
           icon={Navigation} 
-          trend="-2.4%" 
-          trendUp={false} 
+          trend={stats.trends?.trips || "-2.4%"} 
+          trendUp={stats.trends?.trips_up ?? false} 
           onClick={() => navigate('/live')}
         />
         <StatCard 
           title={t('dash.total_passengers')} 
-          value="2,840" 
+          value={stats.total_passengers.toLocaleString()} 
           icon={Users} 
-          trend="+15.3%" 
-          trendUp={true} 
+          trend={stats.trends?.passengers || "+15.3%"} 
+          trendUp={stats.trends?.passengers_up ?? true} 
           onClick={() => navigate('/operations/trips')}
         />
         {!isMaster && (
            <StatCard 
             title="Operational Health" 
-            value="98.2%" 
+            value={stats.operational_health || "98.2%"} 
             icon={Activity} 
-            trend="+0.5%" 
-            trendUp={true} 
+            trend={stats.trends?.health || "+0.5%"} 
+            trendUp={stats.trends?.health_up ?? true} 
             onClick={() => navigate('/operations/alerts')}
           />
         )}

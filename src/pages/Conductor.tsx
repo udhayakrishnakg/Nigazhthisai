@@ -37,167 +37,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useTranslation } from '../lib/i18n';
 
-// Real-world historical ticket records across different months for analytics
-const MOCK_HISTORICAL_TICKETS = [
-  {
-    ticket_id: "NIG-883921",
-    trip_id: "TRIP-102938",
-    origin_name: "Gandhipuram",
-    destination_name: "Singanallur",
-    seats: 1,
-    ticket_type: "REGULAR",
-    fare: 15,
-    issued_at: "08:15 AM",
-    date: "Jul 15, 2026"
-  },
-  {
-    ticket_id: "NIG-583920",
-    trip_id: "TRIP-102938",
-    origin_name: "Gandhipuram",
-    destination_name: "Ukkadam",
-    seats: 2,
-    ticket_type: "STUDENT",
-    fare: 30,
-    issued_at: "09:40 AM",
-    date: "Jul 15, 2026"
-  },
-  {
-    ticket_id: "NIG-293811",
-    trip_id: "TRIP-102938",
-    origin_name: "Singanallur",
-    destination_name: "Ukkadam",
-    seats: 3,
-    ticket_type: "REGULAR",
-    fare: 90,
-    issued_at: "11:15 AM",
-    date: "Jul 15, 2026"
-  },
-  {
-    ticket_id: "NIG-100293",
-    trip_id: "TRIP-992811",
-    origin_name: "Gandhipuram",
-    destination_name: "Ukkadam",
-    seats: 2,
-    ticket_type: "REGULAR",
-    fare: 60,
-    issued_at: "02:30 PM",
-    date: "Jul 14, 2026"
-  },
-  {
-    ticket_id: "NIG-993821",
-    trip_id: "TRIP-992811",
-    origin_name: "Singanallur",
-    destination_name: "Ukkadam",
-    seats: 1,
-    ticket_type: "CONCESSION",
-    fare: 10,
-    issued_at: "04:10 PM",
-    date: "Jul 14, 2026"
-  },
-  {
-    ticket_id: "NIG-482931",
-    trip_id: "TRIP-394829",
-    origin_name: "Koyambedu (CMBT)",
-    destination_name: "Adyar",
-    seats: 2,
-    ticket_type: "REGULAR",
-    fare: 90,
-    issued_at: "10:30 AM",
-    date: "Jun 28, 2026"
-  },
-  {
-    ticket_id: "NIG-283928",
-    trip_id: "TRIP-394829",
-    origin_name: "Central Railway Station",
-    destination_name: "Egmore",
-    seats: 4,
-    ticket_type: "STUDENT",
-    fare: 60,
-    issued_at: "01:15 PM",
-    date: "Jun 28, 2026"
-  },
-  {
-    ticket_id: "NIG-382910",
-    trip_id: "TRIP-394829",
-    origin_name: "Koyambedu (CMBT)",
-    destination_name: "Egmore",
-    seats: 1,
-    ticket_type: "REGULAR",
-    fare: 30,
-    issued_at: "03:45 PM",
-    date: "Jun 15, 2026"
-  },
-  {
-    ticket_id: "NIG-192837",
-    trip_id: "TRIP-554627",
-    origin_name: "Mattuthavani",
-    destination_name: "Arapalayam",
-    seats: 3,
-    ticket_type: "REGULAR",
-    fare: 135,
-    issued_at: "11:20 AM",
-    date: "May 25, 2026"
-  },
-  {
-    ticket_id: "NIG-473928",
-    trip_id: "TRIP-554627",
-    origin_name: "Periyar Bus Stand",
-    destination_name: "Arapalayam",
-    seats: 2,
-    ticket_type: "REGULAR",
-    fare: 60,
-    issued_at: "02:10 PM",
-    date: "May 25, 2026"
-  },
-  {
-    ticket_id: "NIG-918273",
-    trip_id: "TRIP-554627",
-    origin_name: "Mattuthavani",
-    destination_name: "Periyar Bus Stand",
-    seats: 1,
-    ticket_type: "CONCESSION",
-    fare: 15,
-    issued_at: "04:30 PM",
-    date: "May 10, 2026"
-  },
-  {
-    ticket_id: "NIG-102938",
-    trip_id: "TRIP-223192",
-    origin_name: "Old Bus Stand",
-    destination_name: "Avinashi",
-    seats: 2,
-    ticket_type: "REGULAR",
-    fare: 90,
-    issued_at: "09:15 AM",
-    date: "Apr 20, 2026"
-  },
-  {
-    ticket_id: "NIG-772839",
-    trip_id: "TRIP-223192",
-    origin_name: "New Bus Stand",
-    destination_name: "Avinashi",
-    seats: 1,
-    ticket_type: "REGULAR",
-    fare: 30,
-    issued_at: "11:45 AM",
-    date: "Apr 20, 2026"
+const getBusFleet = (): any[] => {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem('nigazhthisai_buses') || '[]';
+  try {
+    const list = JSON.parse(stored);
+    return list.map((b: any) => ({
+      bus_id: String(b.id),
+      number_plate: b.reg_no,
+      route_name: `${b.model || 'Bus'} (${b.type || 'NON-AC'})`,
+      stops: b.stops || []
+    }));
+  } catch {
+    return [];
   }
-];
-
-// Real-world bus fleet for Nigazhthisai
-const BUS_FLEET = [
-  { bus_id: 'CBE-BUS-1', number_plate: 'TN-37-BY-1111', route_name: 'Coimbatore Fast Track (CBE1)', stops: ['Gandhipuram', 'Singanallur', 'Ukkadam'] },
-  { bus_id: 'MAS-BUS-1', number_plate: 'TN-01-DA-5555', route_name: 'Chennai Metro Connector (MAS1)', stops: ['Koyambedu (CMBT)', 'Central Railway Station', 'Egmore', 'Adyar'] },
-  { bus_id: 'MDU-BUS-1', number_plate: 'TN-59-CA-3333', route_name: 'Madurai City Rider (MDU1)', stops: ['Mattuthavani', 'Periyar Bus Stand', 'Arapalayam'] },
-  { bus_id: 'TPR-BUS-1', number_plate: 'TN-39-AA-1122', route_name: 'Tiruppur Avinashi Link (TPR1)', stops: ['Old Bus Stand', 'New Bus Stand', 'Avinashi'] }
-];
-
-const AUTHORIZED_MAP: Record<string, { id: string; name: string }> = {
-  'CBE-BUS-1': { id: 'COND-CBE-01', name: 'Suresh Kumar' },
-  'MAS-BUS-1': { id: 'COND-MAS-02', name: 'Mani Arumugam' },
-  'MDU-BUS-1': { id: 'COND-MDU-03', name: 'Selvamurugan' },
-  'TPR-BUS-1': { id: 'COND-TPR-04', name: 'Ramesh Krishnan' }
 };
+
+const AUTHORIZED_MAP: Record<string, { id: string; name: string }> = {};
 
 export const ConductorPage: React.FC = () => {
   const { t, language, setLanguage } = useTranslation();
@@ -233,7 +89,7 @@ export const ConductorPage: React.FC = () => {
   // Pre-populate tempSelectedBus if activeBusId is already loaded
   const [tempSelectedBus, setTempSelectedBus] = useState<any | null>(() => {
     const savedBusId = localStorage.getItem('conductor_bus_id');
-    return savedBusId ? BUS_FLEET.find(b => b.bus_id === savedBusId) : null;
+    return savedBusId ? getBusFleet().find(b => b.bus_id === savedBusId) : null;
   });
 
   const [searchBusQuery, setSearchBusQuery] = useState('');
@@ -242,8 +98,8 @@ export const ConductorPage: React.FC = () => {
   const [ticketsToday, setTicketsToday] = useState<any[]>(() => {
     const saved = localStorage.getItem('conductor_tickets_list');
     if (saved) return JSON.parse(saved);
-    localStorage.setItem('conductor_tickets_list', JSON.stringify(MOCK_HISTORICAL_TICKETS));
-    return MOCK_HISTORICAL_TICKETS;
+    localStorage.setItem('conductor_tickets_list', JSON.stringify([]));
+    return [];
   });
 
   // Analytics states for the 3-dot menu and dashboard calculations
@@ -270,7 +126,7 @@ export const ConductorPage: React.FC = () => {
   const [isLangOpen, setIsLangOpen] = useState(false);
 
   // Resolve current active bus & stops
-  const activeBus = BUS_FLEET.find(b => b.bus_id === activeBusId);
+  const activeBus = getBusFleet().find(b => b.bus_id === activeBusId);
   const activeBusStops = activeBus ? activeBus.stops : [];
 
   const getProgressBarClass = (count: number) => {
@@ -443,9 +299,9 @@ export const ConductorPage: React.FC = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1200));
       const generatedTripId = `TRIP-${Math.floor(100000 + Math.random() * 900000)}`;
-      const mockJwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-jwt-token-nigazhthisai';
+      const localJwt = 'session-' + Math.random().toString(36).substring(2, 15);
 
-      localStorage.setItem('conductor_jwt', mockJwt);
+      localStorage.setItem('conductor_jwt', localJwt);
       localStorage.setItem('conductor_id', scannedConductorId);
       localStorage.setItem('conductor_name', scannedConductorName || 'Authorized Conductor');
       localStorage.setItem('conductor_bus_id', tempSelectedBus.bus_id);
@@ -454,7 +310,7 @@ export const ConductorPage: React.FC = () => {
       localStorage.setItem('conductor_trip_id', generatedTripId);
       localStorage.removeItem('conductor_tickets_list');
 
-      setJwt(mockJwt);
+      setJwt(localJwt);
       setActiveConductorId(scannedConductorId);
       setActiveBusId(tempSelectedBus.bus_id);
       setActiveRouteName(tempSelectedBus.route_name);
@@ -697,7 +553,7 @@ export const ConductorPage: React.FC = () => {
   };
 
   // Filtered bus list based on plate or route name search query
-  const filteredBuses = BUS_FLEET.filter(bus => 
+  const filteredBuses = getBusFleet().filter(bus => 
     bus.number_plate.toLowerCase().includes(searchBusQuery.toLowerCase()) || 
     bus.route_name.toLowerCase().includes(searchBusQuery.toLowerCase())
   );
@@ -1776,7 +1632,7 @@ export const ConductorPage: React.FC = () => {
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select Bus to Simulate Scan</p>
                   
                   <div className="space-y-3.5 max-h-56 overflow-y-auto pr-1">
-                    {BUS_FLEET.map((bus) => {
+                    {getBusFleet().map((bus) => {
                       const authInfo = AUTHORIZED_MAP[bus.bus_id] || { id: 'COND-GEN-01', name: 'Authorized Staff' };
                       return (
                         <div key={bus.bus_id} className="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2.5">

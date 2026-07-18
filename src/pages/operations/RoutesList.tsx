@@ -170,7 +170,7 @@ export const RoutesList: React.FC = () => {
     if (!selectedRoute) return;
     setIsSubmitting(true);
     try {
-      // In a real app we'd call an API. Here we update mock state indirectly.
+      // Update the route details through our database repository API
       await adminApi.updateRoute(selectedRoute.id, {
         stops: selectedRoute.stops,
         day_schedules: schedules

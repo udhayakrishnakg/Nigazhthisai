@@ -24,56 +24,7 @@ export interface SOSSession {
 
 const STORAGE_KEY = 'nigazhthisai_sos_sessions';
 
-// Default initial mock session to make the page populated and engaging out of the box
-const DEFAULT_SESSIONS: SOSSession[] = [
-  {
-    id: 'SOS-101',
-    senderName: 'Rajesh Kumar',
-    senderEmail: 'rajesh@example.com',
-    senderRole: 'PASSENGER',
-    senderMobile: '9443210987',
-    busNo: 'TN-37-BY-1111',
-    routeName: 'Coimbatore Fast Track (CBE1)',
-    district: 'Coimbatore',
-    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(), // 2 hours ago
-    status: 'SOLVED',
-    resolvedAt: new Date(Date.now() - 3600000 * 1.5).toISOString(),
-    messages: [
-      {
-        id: 'msg-1',
-        senderName: 'Rajesh Kumar',
-        senderRole: 'PASSENGER',
-        senderEmail: 'rajesh@example.com',
-        message: 'Medical emergency on the bus! A passenger collapsed near the front row.',
-        timestamp: new Date(Date.now() - 3600000 * 2).toISOString()
-      },
-      {
-        id: 'msg-2',
-        senderName: 'Chennai Control Room',
-        senderRole: 'MASTER_ADMIN',
-        senderEmail: 'master@nigazhthisai.com',
-        message: 'Understood, Rajesh. We are dispatching an ambulance to intercept the bus near Peelamedu. Conductor has been notified.',
-        timestamp: new Date(Date.now() - 3600000 * 1.9).toISOString()
-      },
-      {
-        id: 'msg-3',
-        senderName: 'Rajesh Kumar',
-        senderRole: 'PASSENGER',
-        senderEmail: 'rajesh@example.com',
-        message: 'Thank you! Ambulance has arrived and passenger has been safely assisted.',
-        timestamp: new Date(Date.now() - 3600000 * 1.6).toISOString()
-      },
-      {
-        id: 'msg-4',
-        senderName: 'Chennai Control Room',
-        senderRole: 'MASTER_ADMIN',
-        senderEmail: 'master@nigazhthisai.com',
-        message: 'Perfect, glad they are safe. We are marking this emergency as solved. Take care!',
-        timestamp: new Date(Date.now() - 3600000 * 1.55).toISOString()
-      }
-    ]
-  }
-];
+const DEFAULT_SESSIONS: SOSSession[] = [];
 
 export const getSOSSessions = (): SOSSession[] => {
   const stored = localStorage.getItem(STORAGE_KEY);

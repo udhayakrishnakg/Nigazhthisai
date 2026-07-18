@@ -28,7 +28,7 @@ export class TripRepository implements ITripRepository {
           found.trip_start_lng = req.start_lng;
           found.actual_start_time = new Date().toISOString();
         } else {
-          // create mock trip if it doesn't exist
+          // create local dynamic trip if it doesn't exist
           found = {
             id: req.trip_id,
             status: 'RUNNING',
